@@ -23,7 +23,7 @@ const inputDuration = document.querySelector(".form__input--duration");
 const inputCadence = document.querySelector(".form__input--cadence");
 const inputElevation = document.querySelector(".form__input--elevation");
 
-let map;
+let map, mapEvent;
 
 //getting the current location coords using geolocation API
 if (navigator.geolocation) {
@@ -44,24 +44,11 @@ if (navigator.geolocation) {
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
-      //displaying the marker on map wherever the user clicks it
-      map.on("click", function (mapEvent) {
-        const { lat, lng } = mapEvent.latlng;
-        const coords = [lat, lng];
-        //creation of marker and popup to display on map
-        L.marker(coords, { riseOnHover: true })
-          .addTo(map)
-          .bindPopup(
-            L.popup({
-              maxWidth: 250,
-              minWidth: 100,
-              autoClose: false,
-              closeOnClick: false,
-              className: "running-popup",
-            })
-          )
-          .setPopupContent("Popup")
-          .openPopup();
+      map.on("click", function (mapE) {
+        mapEvent = mapE;
+        //render a workout form when user clicks on map
+        form.classList.remove("hidden");
+        inputDistance.focus();
       });
     },
     function () {
@@ -69,3 +56,36 @@ if (navigator.geolocation) {
     }
   );
 }
+//displaying the marker on map wherever the user clicks it and submit the form
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  //clear input fields
+  inputCadence.value =
+    inputDistance.value =
+    inputDuration.value =
+    inputElevation.value =
+      "";
+
+  const { lat, lng } = mapEvent.latlng;
+  const coords = [lat, lng];
+  //creation of marker and popup to display on map
+  L.marker(coords, { riseOnHover: true })
+    .addTo(map)
+    .bindPopup(
+      L.popup({
+        maxWidth: 250,
+        minWidth: 100,
+        autoClose: false,
+        closeOnClick: false,
+        className: "running-popup",
+      })
+    )
+    .setPopupContent("Popup")
+    .openPopup();
+});
+
+inputType.addEventListener("change", function () {
+  inputElevation.closest(".form__row").classList.toggle("form__row--hidden");
+  inputCadence.closest(".form__row").classList.toggle("form__row--hidden");
+});
