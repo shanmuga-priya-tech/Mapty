@@ -23,6 +23,8 @@ const inputDuration = document.querySelector(".form__input--duration");
 const inputCadence = document.querySelector(".form__input--cadence");
 const inputElevation = document.querySelector(".form__input--elevation");
 
+let map;
+
 //getting the current location coords using geolocation API
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
@@ -35,14 +37,32 @@ if (navigator.geolocation) {
       const coords = [latitude, longitude];
       //leaflet starter code
       //creating a map obj using leaflet lib
-      var map = L.map("map").setView(coords, 13);
+      map = L.map("map").setView(coords, 13);
 
       L.tileLayer("https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
-      L.marker(coords).addTo(map).bindPopup("yet to define ").openPopup();
+      //displaying the marker on map wherever the user clicks it
+      map.on("click", function (mapEvent) {
+        const { lat, lng } = mapEvent.latlng;
+        const coords = [lat, lng];
+        //creation of marker and popup to display on map
+        L.marker(coords, { riseOnHover: true })
+          .addTo(map)
+          .bindPopup(
+            L.popup({
+              maxWidth: 250,
+              minWidth: 100,
+              autoClose: false,
+              closeOnClick: false,
+              className: "running-popup",
+            })
+          )
+          .setPopupContent("Popup")
+          .openPopup();
+      });
     },
     function () {
       alert("Allow to access the Location");
