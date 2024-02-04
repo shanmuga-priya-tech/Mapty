@@ -82,7 +82,13 @@ class App {
   #workouts = [];
 
   constructor() {
+    //get current position
     this._getPosition();
+
+    //retrive the data from localstoarge to display the workouts even aftr refresh
+    this._getLocalStorage();
+
+    //adding eventlistener
     form.addEventListener("submit", this._newWorkout.bind(this));
     inputType.addEventListener("change", this._toggleElevationField);
     containerWorkouts.addEventListener("click", this._moveToPopup.bind(this));
@@ -116,6 +122,10 @@ class App {
     }).addTo(this.#map);
 
     this.#map.on("click", this._showForm.bind(this));
+
+    this.#workouts.forEach(el => {
+      this._renderWorkoutMarker(el);
+    });
   }
 
   _showForm(mapE) {
@@ -202,7 +212,10 @@ class App {
     this._renderWorkout(workout);
 
     //7)hide the form
-    this_hideForm();
+    this._hideForm();
+
+    //8)set localstorage to all workouts
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -274,7 +287,7 @@ class App {
     form.insertAdjacentHTML("afterend", html);
   }
   _moveToPopup(e) {
-    const workoutEl = e.target.closet(".workout");
+    const workoutEl = e.target.closest(".workout");
 
     if (!workoutEl) return;
 
@@ -287,6 +300,28 @@ class App {
         duration: 1,
       },
     });
+  }
+  _setLocalStorage() {
+    //storing workout in localstorage
+    localStorage.setItem("workouts", JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    //retriving data from local storage
+    const data = JSON.parse(localStorage.getItem("workouts"));
+    if (!data) return;
+
+    this.#workouts = data;
+
+    this.#workouts.forEach(el => {
+      this._renderWorkout(el);
+    });
+  }
+
+  //del all workouts from local storage this method can be used in console like(app.rest())
+  reset() {
+    localStorage.removeItem("workouts");
+    location.reload();
   }
 }
 
